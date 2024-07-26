@@ -1,0 +1,80 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.2'
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'iknowahra'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // SpringBoot Initializer START
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    runtimeOnly 'org.springframework.boot:spring-boot-devtools'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3'
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: '3.3.0'
+//    implementation 'org.springframework.boot:spring-boot-starter-security:2.7.0'
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+    implementation 'org.springframework.boot:spring-boot-starter-aop:2.7.0'
+    implementation 'org.springframework.boot:spring-boot-starter-validation:2.7.0'
+    // SpringBoot Initializer END
+
+    // Spring Security JWT Token START
+    implementation 'io.jsonwebtoken:jjwt:0.9.1'
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
+    // Spring Security JWT Token 관련 END
+
+    // log4jdbc-log4j2 START
+    implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4:1.16'
+    // log4jdbc-log4j2 END
+
+    // POI START
+    implementation 'org.apache.poi:poi:5.2.3'
+    implementation 'org.apache.poi:poi-ooxml:5.2.3'
+    // POI 6 END
+
+    // database : postgresql
+    implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.3'
+
+    // Gson: Java타입 Json으로 변환 START
+    implementation 'com.google.code.gson:gson:2.11.0'
+    // Gson: Java타입 Json으로 변환 END
+
+    // commons-net: FTP 사용하여 파일 전송 START
+    implementation 'commons-net:commons-net:3.10.0'
+    // commons-net: FTP 사용하여 파일 전송 END
+
+    // commons-text: HTML 태그 escape START
+    implementation 'org.apache.commons:commons-text:1.10.0'
+    // commons-text: HTML 태그 escape START
+
+    // Swagger 설정 START
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+    // Swagger 설정 END
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

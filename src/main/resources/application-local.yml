@@ -1,0 +1,60 @@
+# 로컬계 환경
+simplespring:
+  # JWT 설정
+  jwt:
+    # JWT 서명 키
+    signing-Key: "local"
+    # Access JWT 토큰 유효 기간 (밀리초 단위)
+    access-token-valid-period: 1800000 # 30*60*1000 = 30mins
+    # Refresh JWT 토큰 유효 기간 (밀리초 단위)
+    refresh-token-valid-period: 1800000 # 30*60*1000 = 30mins
+
+  # 데이터베이스 트랜잭션 로그 활성화 여부
+  database-transaction-log-enabled: true # Database에 log 저장 기능 (기본값: false)
+
+  file:
+    upload-dir: ""
+    messages-json-path: "" # messages.json 생성 경로
+
+  # 다국어 JSON 파일 원격 서버로 전송하기 위한 기본 설정 값
+  ftp:
+    multi-lang-json:
+      server: # e.g. Apache 서버의 주소
+      port: 21 # 설정이 없을 경우 기본값: 21
+      user:
+      password:
+      remote-file-path:
+
+# Spring 설정
+spring:
+  datasource: # Database 설정
+    url: jdbc:postgresql://localhost:5432/simplespring
+    username: postgres
+    password:
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 3 #최대 pool 크기
+      minimum-idle: 1 #최소 pool 크기
+      idle-timeout: 600000 #연결위한 최대 유후 시간
+      max-lifetime: 1800000 #반납된 커넥션의 최대 수명
+
+# Tomcat 설정
+server:
+  port: 8080
+
+# Swagger/Springdoc 설정
+springdoc:
+  default-consumes-media-type: application/json;charset=UTF-8
+  default-produces-media-type: application/json;charset=UTF-8
+  swagger-ui:
+    path: /swagger-ui.html
+    #disable-swagger-default-url: true
+    #display-request-duration: true
+    operations-sorter: alpha
+    tagsSorter: alpha
+  #show-actuator: true
+
+simple:
+  spring:
+    lang:
+      code: ko

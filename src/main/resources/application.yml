@@ -1,0 +1,30 @@
+# 모든 환경 전역 설정
+
+# Spring 설정
+spring:
+  application: # Application 이름
+    name: simpleSpring
+
+  servlet: # 첨부파일 용량제한
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+# Mybatis 설정
+mybatis:
+  # resources/mappers/ 에 있는 모든 xml 파일
+  mapper-locations: classpath:mappers/*.xml
+  # @Alias 스캔하는 경로 설정
+  type-aliases-package: |
+    com.spring.global.object, 
+    com.spring.global.resolver, 
+    com.spring.loginMvc.helper, 
+    com.spring.loginMvc.dto
+  configuration:
+    cache-enabled: false
+    local-cache-scope: STATEMENT
+    use-generated-keys: true
+    default-executor-type: REUSE
+    call-setters-on-nulls: true
+    jdbc-type-for-null: "null"
+    map-underscore-to-camel-case: true

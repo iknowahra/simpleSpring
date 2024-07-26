@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--
+	SQL File Name : LoginSQL.xml
+	Description : 로그인 관련 쿼리
+-->
+<mapper namespace="com.spring.loginMvc.dao.LoginMapper">
+    <select id="selectUser" resultType="UserDTO" parameterType="string">
+    <![CDATA[
+        /* QueryID=LoginMapper.selectUser */
+        SELECT A.USER_ID                                              /* 사용자아이디 */
+             , A.USER_PW                                              /* 사용자비밀번호 */
+             , A.USER_CLS                                             /* 사용자구분 */
+             , A.USER_NM                                              /* 사용자명 */
+             , A.USER_ENG_NM                                          /* 사용자 영문명 */
+             , A.MAIL_ADDR                                            /* 이메일주소 */
+             , A.TEL_NO                                               /* 전화번호 */
+             , A.DEPT_CD                                              /* 부서코드 */
+             --, (SELECT SD.DEPT_NM FROM ZZ_DEPT_M SD WHERE SD.DEPT_CD = A.DEPT_CD ) AS DEPT_NM /* 부서명 */
+             , A.DUTY_CD                                              /* 직책코드 */
+             , A.DUTY_NM                                              /* 직책명 */
+             , A.POSI_CD                                              /* 직위코드 */
+             , A.POSI_NM                                              /* 직위명 */
+             , A.RETI_YN                                              /* 퇴직여부 */
+             , A.REMK                                                 /* 비고 */
+             , TO_CHAR(A.PW_CHG_DTM,'YYYYMMDD') AS PW_CHG_DTM         /* 비밀번호 변경일자 */
+             , A.LGN_FAIL_CNT                                         /* 로그인실패횟수 */
+             , TO_CHAR(A.LAST_LGN_DTM,'YYYYMMDD') AS LAST_LGN_DTM     /* 최종로그인일자 */
+             , COALESCE(A.LOCK_YN,'N') AS LOCK_YN                     /* 잠김여부 */
+             , A.FRST_LGN_YN                                          /* 최초로그인여부 */
+             , A.PW_1CHG                                              /* 비밀번호1변경 */
+             , TO_CHAR(A.PW_1CHG_DTM,'YYYYMMDD') AS PW_1CHG_DTM       /* 비밀번호1변경일시 */
+             , A.PW_2CHG                                              /* 비밀번호2변경 */
+             , TO_CHAR(A.PW_2CHG_DTM,'YYYYMMDD') AS PW_2CHG_DTM       /* 비밀번호2변경일시 */
+             , A.PW_3CHG                                              /* 비밀번호3변경 */
+             , TO_CHAR(A.PW_3CHG_DTM,'YYYYMMDD') AS PW_3CHG_DTM       /* 비밀번호3변경일시 */
+             , A.PW_4CHG                                              /* 비밀번호4변경 */
+             , TO_CHAR(A.PW_4CHG_DTM,'YYYYMMDD') AS PW_4CHG_DTM       /* 비밀번호4변경일시 */
+             , A.PW_5CHG                                              /* 비밀번호5변경 */
+             , TO_CHAR(A.PW_5CHG_DTM,'YYYYMMDD') AS PW_5CHG_DTM       /* 비밀번호5변경일시 */
+             , A.REG_ID                                               /* 등록자아이디 */
+             , TO_CHAR(A.REG_DTM, 'YYYYMMDD') AS REG_DTM              /* 등록일시 */
+             , A.UPD_ID                                               /* 수정자아이디 */
+             , TO_CHAR(A.UPD_DTM, 'YYYYMMDD') AS UPD_DTM              /* 수정일시 */
+             , (SELECT MGR_USER_ID FROM ZZ_DEPT_M WHERE DEPT_CD = A.DEPT_CD) AS MGR_USER_ID /* 부서장아이디 */
+        FROM ZZ_USER_M A
+        WHERE A.USER_ID = #{userId}
+        ]]>   
+    </select>
+
+    <update id="updateLgnFailCntByPlusOne" parameterType="string">
+    <![CDATA[
+        /* QueryID=LoginMapper.updateLgnFailCntByPlusOne */
+        UPDATE ZZ_USER_M
+        SET LGN_FAIL_CNT    = COALESCE(LGN_FAIL_CNT, 0) + 1          /* 로그인실패횟수 */
+          , UPD_DTM         = CURRENT_TIMESTAMP                      /* 수정일시 */
+          , UPD_ID          = #{gvUserId}                            /* 수정자아이디 */
+        WHERE USER_ID = #{userId}
+        ]]>
+    </update>
+
+    <update id="updateLockYNtoY" parameterType="string">
+    <![CDATA[
+        /* QueryID=LoginMapper.updateLockYNtoY */
+        UPDATE ZZ_USER_M
+        SET UPD_DTM         = CURRENT_TIMESTAMP                         /* 수정일시 */
+          , UPD_ID          = #{gvUserId}                            /* 수정자아이디 */
+          , LOCK_YN         = 'Y'                                  /* 잠김여부 */
+        WHERE USER_ID = #{userId}
+        ]]>
+    </update>
+
+    <update id="updateLogFailCntToZero" parameterType="string">
+    <![CDATA[
+        /* QueryID=LoginMapper.updateLogFailCntToZero */
+        UPDATE ZZ_USER_M
+        SET LGN_FAIL_CNT    = 0                                    /* 로그인실패횟수 */
+          , LAST_LGN_DTM    = CURRENT_TIMESTAMP                         /* 최종로그인일자 */
+          , UPD_DTM         = CURRENT_TIMESTAMP                         /* 수정일시 */
+          , UPD_ID          = #{gvUserId}                            /* 수정자아이디 */
+        WHERE USER_ID = #{userId}
+        ]]>
+    </update>
+
+    <update id="updateUserPassword" parameterType="PwChangeDTO">
+        /* QueryID=LoginMapper.updateUserPassword */
+        UPDATE ZZ_USER_M
+        SET UPD_DTM     = CURRENT_TIMESTAMP /* 수정일시 */
+          , UPD_ID      = #{gvUserId} /* 수정자아이디 */
+          , USER_PW     = #{newPw}
+          , PW_CHG_DTM  = CURRENT_TIMESTAMP
+          , PW_1CHG     = USER_PW
+          , PW_1CHG_DTM = PW_CHG_DTM
+          , PW_2CHG     = PW_1CHG
+          , PW_2CHG_DTM = PW_1CHG_DTM
+          , PW_3CHG     = PW_2CHG
+          , PW_3CHG_DTM = PW_2CHG_DTM
+          , PW_4CHG     = PW_3CHG
+          , PW_4CHG_DTM = PW_3CHG_DTM
+          , PW_5CHG     = PW_4CHG
+          , PW_5CHG_DTM = PW_4CHG_DTM
+        WHERE USER_ID = #{userId}
+    </update>
+
+</mapper>
