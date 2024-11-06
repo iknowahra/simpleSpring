@@ -52,7 +52,9 @@ public class SecurityConf {
                 .authorizeHttpRequests(requests -> requests
                         .dispatcherTypeMatchers(FORWARD, ERROR).permitAll()
                         .requestMatchers("/login", "/logout", "/login/languages", "/refresh",
-                                "/change-password", "/swagger-ui/index.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                                "/login/change-password", "/swagger-ui/index.html", "/swagger-ui/**", "/v3/api-docs/**",
+                                "/actuator/**", "/health-check/**"
+                        ).permitAll()
                         .anyRequest().authenticated())
                 .headers(headers -> headers
                         .addHeaderWriter(new XXssProtectionHeaderWriter())
@@ -71,5 +73,4 @@ public class SecurityConf {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration auth) throws Exception {
         return auth.getAuthenticationManager();
     }
-
 }

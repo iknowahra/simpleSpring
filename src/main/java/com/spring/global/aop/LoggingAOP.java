@@ -56,7 +56,7 @@ public class LoggingAOP {
         } catch (Throwable throwable) {
             // Log the exception
             loggingBuilder.appendTitle(LogColors.RED, "-- Controller ERROR: {} ", extractSignature);
-            loggingBuilder.append(LogColors.RED, "# Exception: {} ", throwable.toString());
+            loggingBuilder.append(LogColors.RED, "# Exception: {} ", throwable.getMessage());
             throw throwable; // Re-throw the exception after logging
         }
     }

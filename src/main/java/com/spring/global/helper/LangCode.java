@@ -7,8 +7,8 @@ import java.util.Map;
 
 public enum LangCode {
     KO("ko", "한국어"),
-    EN("en", "영어"),
-    ZH("zh", "중국어");
+    EN("en", "English"),
+    ZH("zh", "中文");
 
     private final String code;
     private final String name;

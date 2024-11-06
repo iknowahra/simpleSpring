@@ -45,7 +45,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     private void handleException(HttpServletRequest request, HttpServletResponse response,
                                  AuthenticationException exception)
             throws IOException, ServletException {
-        SecurityContextHolder.clearContext();
+        //SecurityContextHolder.clearContext();
         authenticationEntryPoint.commence(request, response, exception);
     }
 

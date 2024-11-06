@@ -16,11 +16,14 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.nio.file.AccessDeniedException;
 import java.util.Collections;
@@ -100,12 +103,28 @@ public class GlobalExceptionHandler {
      * @param exception HttpClientErrorException
      * @return ResponseEntity<ErrorResponse>
      */
-    @ExceptionHandler(HttpClientErrorException.BadRequest.class)
-    protected ResponseEntity<ErrorResponse> handleBadRequestException(HttpClientErrorException exception,
-                                                                      WebRequest webRequest) {
-        ErrorCode errorCode = ErrorCode.BAD_REQUEST;
+    @ExceptionHandler(HttpClientErrorException.class)
+    protected ResponseEntity<ErrorResponse> handleHttpClientErrorException(HttpClientErrorException exception
+    ) {
+        ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
         final ErrorResponse response = ErrorResponse.of(errorCode);
-        loggingBuilder.append(LogColors.RED, "[{}.handleBadRequestException] : {}",
+        loggingBuilder.append(LogColors.RED, "[{}.handleHttpClientErrorException] : {}",
+                this.getClass().getSimpleName());
+        exception.printStackTrace();
+        return new ResponseEntity<>(response, errorCode.getHttpStatus());
+    }
+
+    /**
+     * [Exception] 없는 파일 / 경로를 요청할 때
+     *
+     * @param exception NoResourceFoundException
+     * @return ResponseEntity<ErrorResponse>
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    protected ResponseEntity<ErrorResponse> handleNoResourceFoundException(NoResourceFoundException exception) {
+        ErrorCode errorCode = ErrorCode.NOT_FOUND;
+        final ErrorResponse response = ErrorResponse.of(errorCode);
+        loggingBuilder.append(LogColors.RED, "[{}.handleNoResourceFoundException] : {}",
                 this.getClass().getSimpleName(), response.toString());
         return new ResponseEntity<>(response, errorCode.getHttpStatus());
     }
@@ -122,6 +141,39 @@ public class GlobalExceptionHandler {
         loggingBuilder.append(LogColors.RED, "[{}.handleHttpRequestMethodNotSupportedException] : {}",
                 this.getClass().getSimpleName(), exception);
         ErrorCode errorCode = ErrorCode.BAD_REQUEST;
+        final ErrorResponse response = ErrorResponse.of(errorCode);
+        return new ResponseEntity<>(response, errorCode.getHttpStatus());
+    }
+
+    /**
+     * [Exception] 필수 헤더를 제시하지 않을 경우
+     *
+     * @param exception MissingRequestHeaderException
+     * @return ResponseEntity<ErrorResponse>
+     */
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    protected ResponseEntity<ErrorResponse> handleMissingRequestHeaderException(
+            MissingRequestHeaderException exception) {
+        loggingBuilder.append(LogColors.RED, "[{}.handleMissingRequestHeaderException] : {}",
+                this.getClass().getSimpleName(), exception);
+        ErrorCode errorCode = ErrorCode.BAD_REQUEST;
+        final ErrorResponse response = ErrorResponse.of(errorCode);
+        return new ResponseEntity<>(response, errorCode.getHttpStatus());
+    }
+
+    /**
+     * [Exception] Rest template 예외 전달
+     *
+     * @param exception HttpServerErrorException
+     * @return ResponseEntity<ErrorResponse>
+     */
+    @ExceptionHandler(HttpServerErrorException.class)
+    protected ResponseEntity<ErrorResponse> handleHttpServerErrorException(
+            HttpServerErrorException exception) {
+        loggingBuilder.append(LogColors.RED, "[{}.handleHttpServerErrorException] : {}",
+                this.getClass().getSimpleName());
+        exception.printStackTrace();
+        ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
         final ErrorResponse response = ErrorResponse.of(errorCode);
         return new ResponseEntity<>(response, errorCode.getHttpStatus());
     }
@@ -166,6 +218,30 @@ public class GlobalExceptionHandler {
 
     /**
      * [Exception]
+     * 스프링 시큐리티 예외
+     *
+     * @param // exception UserPasswordException
+     */
+//    @ExceptionHandler(CustomAuthenticationException.class)
+//    protected ResponseEntity<ErrorResponse> handleCustomAuthenticationException(CustomAuthenticationException exception) {
+//        loggingBuilder.append(LogColors.RED, "[{}.handleCustomAuthenticationException] : {}",
+//                this.getClass().getSimpleName(),
+//                exception);
+//        ErrorCode errorCode = exception.getErrorCode();
+//        final ErrorResponse response = ErrorResponse.of(errorCode);
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.add(AppConst.AUTHENTICATION_STATUS, writeAuthenticateState("Access to the site",
+//                errorCode.getHeaderMessage()));
+//
+//        return new ResponseEntity<>(response, headers, errorCode.getHttpStatus());
+//    }
+    private String writeAuthenticateState(String realm, String error) {
+        return "Basic realm=\"" + realm + "\", error=\"" + error + "\"";
+    }
+
+    /**
+     * [Exception]
      * 비밀번호 변경 로직과 관련한 에러 발생시 (스프링 시큐리티를 벗어난 로직)
      *
      * @param exception UserPasswordException
@@ -204,6 +280,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ErrorResponse> handleException(Exception exception, WebRequest webRequest) {
         loggingBuilder.append(LogColors.RED, "[{}.handleException]", this.getClass().getSimpleName());
+
         exception.printStackTrace();
         ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
         final ErrorResponse response = ErrorResponse.of(errorCode);

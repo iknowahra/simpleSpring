@@ -5,29 +5,31 @@ import com.spring.global.error.Exception.CustomAuthenticationException;
 import com.spring.global.security.CustomUserDetails;
 import com.spring.global.security.JwtTokenProvider;
 import com.spring.loginMvc.dto.LoginDTO;
+import com.spring.loginMvc.dto.TokenDTO;
 import com.spring.loginMvc.service.AuthenticationService;
-import jakarta.servlet.http.HttpSession;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
-
     private final JwtTokenProvider tokenProvider;
     private final AuthenticationManager authenticationManager;
 
     @Override
-    public String login(LoginDTO loginDTO) {
+    public TokenDTO login(LoginDTO loginDTO) {
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(loginDTO.getUserId(),
                 loginDTO.getUserPw());
         Authentication authentication = authenticationManager.authenticate(authToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
@@ -37,58 +39,38 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String accessToken = tokenProvider.createAccessToken(authentication); // Access 토큰 생성
         String refreshToken = tokenProvider.createRefreshToken(authentication); // Refresh 토큰 생성
 
-        // refresh 토큰 저장
-        storeRefreshToken(accessToken, refreshToken);
-
-        return accessToken;
+        return new TokenDTO(accessToken, refreshToken, true);
     }
 
     @Override
-    public String refresh(String accessToken) {
-
-        // 세션에 저장된 Refresh 토큰 불러오기
-        String refreshToken = getRefreshToken(accessToken);
-        if (refreshToken == null) {// 세션에 저장된 Refresh 토큰이 없을 경우, 예외처리
+    public TokenDTO refresh(final String refreshToken) {
+        if (refreshToken == null)
             throw new CustomAuthenticationException(ErrorCode.NOT_VALID_TOKEN);
-        }
 
-        // Refresh 토큰 불러오기
         if (!tokenProvider.isValidToken(refreshToken)) {// Refresh 토큰이 만료되었을 경우, 예외처리
-            throw new CustomAuthenticationException(ErrorCode.NOT_VALID_TOKEN);
+            throw new CustomAuthenticationException(ErrorCode.REFRESH_TOKEN_EXPIRED);
         }
+
         // 위의 유효성 검사 완료 후 이상 없을 경우, Access 토큰 Refresh 토큰 재발급하여 Access 토큰만 화면으로 반환
         Authentication authentication = tokenProvider.getAuthentication(refreshToken);
 
         String newAccessToken = tokenProvider.createAccessToken(authentication); // Access 토큰 생성 로직 호출
         String newRefreshToken = tokenProvider.createRefreshToken(authentication); // Refresh 토큰 생성 로직 호출
 
-        removeRefreshToken(accessToken); // 기존 Access 토큰, Refresh 토큰 세션에 제거
-        storeRefreshToken(newAccessToken, newRefreshToken); // 새로운 Access 토큰, Refresh 토큰 세션에 저장
-
-        return newAccessToken;
+        TokenDTO tokenDto = new TokenDTO(newAccessToken, newRefreshToken);
+        return tokenDto;
     }
 
-    // 필요에 따라 세션, DB, Redis에서 Refresh 토큰을 불러오도록 구현
-    private String getRefreshToken(String accessToken) {
-        HttpSession session = getSession();
-        String refreshToken = (String) session.getAttribute(accessToken);
-        return refreshToken;
+    @Override
+    public String getUserId(final String token){
+        Claims claims = tokenProvider.getClaims(token);
+        String userId = (String) claims.get("userId");
+        return userId;
     }
 
-    // 필요에 따라 세션, DB, Redis에서 저장하도록 구현
-    private void storeRefreshToken(String accessToken, String refreshToken) {
-        HttpSession session = getSession();
-        session.setAttribute(accessToken, refreshToken);
+    @Override
+    public String removePrefixToken(String token){
+        return tokenProvider.removeBearerPrefix(token);
     }
 
-    // 필요에 따라 세션, DB, Redis에서 제거하도록 구현
-    private void removeRefreshToken(String accessToken) {
-        HttpSession session = getSession();
-        session.removeAttribute(accessToken);
-    }
-
-    private HttpSession getSession() {
-        return ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-                .getRequest().getSession();
-    }
 }

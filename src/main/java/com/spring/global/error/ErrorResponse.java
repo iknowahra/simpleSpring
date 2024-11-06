@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
  */
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@JsonInclude(JsonInclude.Include.NON_NULL) // null인 필드는 직렬화에서 제외
 public class ErrorResponse {
     private String error; // 에러코드
     private String message; // 에러 메시지

@@ -20,6 +20,7 @@ public class SecurityUtil {
 
     public static String getUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        log.error("🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥authentication {}", authentication);
         if (authentication != null && authentication.isAuthenticated()) {
             Object principal = authentication.getPrincipal();
             if (principal instanceof CustomUserDetails) {

@@ -32,11 +32,12 @@ public enum ErrorCode {
     REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "A-106", "해당 refresh token은 만료됐습니다."),
     NOT_ACCESS_TOKEN_TYPE(HttpStatus.UNAUTHORIZED, "A-107", "해당 토큰은 ACCESS TOKEN이 아닙니다."),
     TOKEN_UNSUPPORTED(HttpStatus.UNAUTHORIZED, "A-108", "지원하지 않는 토큰입니다. {0}"),
+    ACCESS_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, "A-109", "access token을 찾을 수 없습니다."),
 
     // 사용자 관련 U,
     NOT_EXISTS_USER(HttpStatus.UNAUTHORIZED, "U-001", "존재하지 않는 사용자입니다."),
     NOT_EXISTS_USER_ID(HttpStatus.UNAUTHORIZED, "U-002", "존재하지 않는 유저 아이디입니다."),
-    NOT_EXISTS_USER_NICKNAME(HttpStatus.UNAUTHORIZED, "U-003", "존재하지 않는 유저 닉네임입니다."),
+    NOT_EXISTS_USERNAME(HttpStatus.UNAUTHORIZED, "U-003", "존재하지 않는 유저 닉네임입니다."),
     NOT_EXISTS_USER_EMAIL(HttpStatus.UNAUTHORIZED, "U-004", "존재하지 않는 유저 이메일입니다."),
     ALREADY_REGISTERED_USER_ID(HttpStatus.UNAUTHORIZED, "U-005", "이미 존재하는 유저 아이디입니다."),
     NOT_EXISTS_USER_PASSWORD(HttpStatus.UNAUTHORIZED, "U-006", "존재하지 않는 유저 비밀번호입니다."),

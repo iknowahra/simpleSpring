@@ -19,7 +19,6 @@ import java.util.Collection;
 @Slf4j
 public class CustomUserDetails implements UserDetails, CredentialsContainer {
     private final UserDTO userDTO;
-
     private String langCd; /* 언어코드 */
     private String accessIp; /* 접속IP */
     private long pwExpireRemainDate; /* 비번 만료일 */

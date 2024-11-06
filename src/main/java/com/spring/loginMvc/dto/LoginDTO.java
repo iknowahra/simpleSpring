@@ -4,6 +4,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.apache.ibatis.type.Alias;
 
+/**
+ * 로그인 시 사용되는 DTO
+ * userId, userPw, langCd
+ */
 @Data
 @Builder
 @ToString

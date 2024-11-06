@@ -1,9 +1,14 @@
 package com.spring.loginMvc.service;
 
 import com.spring.loginMvc.dto.LoginDTO;
+import com.spring.loginMvc.dto.TokenDTO;
 
 public interface AuthenticationService {
-    String login(LoginDTO loginDTO);
+    TokenDTO login(LoginDTO loginDTO);
 
-    String refresh(String accessToken);
+    TokenDTO refresh(String refreshToken);
+
+    String getUserId(String token);
+
+    String removePrefixToken(String token);
 }

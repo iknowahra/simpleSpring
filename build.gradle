@@ -23,9 +23,14 @@ repositories {
     mavenCentral()
 }
 
+ext {
+    set('springCloudVersion', "2023.0.3")
+}
+
 dependencies {
     // SpringBoot Initializer START
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     runtimeOnly 'org.springframework.boot:spring-boot-devtools'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -33,12 +38,12 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3'
-    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: '3.3.0'
-//    implementation 'org.springframework.boot:spring-boot-starter-security:2.7.0'
+    implementation 'org.springframework.boot:spring-boot-starter-security:3.3.0'
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
     implementation 'org.springframework.boot:spring-boot-starter-aop:2.7.0'
     implementation 'org.springframework.boot:spring-boot-starter-validation:2.7.0'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
     // SpringBoot Initializer END
 
     // Spring Security JWT Token START
@@ -73,6 +78,15 @@ dependencies {
     // Swagger 설정 START
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
     // Swagger 설정 END
+
+    // code case 변환 사용하기 위해서 lib 추가
+    implementation group: 'com.google.guava', name: 'guava', version: '31.1-jre'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
 }
 
 tasks.named('test') {
